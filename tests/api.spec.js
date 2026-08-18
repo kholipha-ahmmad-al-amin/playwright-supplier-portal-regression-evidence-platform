@@ -1,0 +1,17 @@
+const { test, expect } = require('@playwright/test')
+test('supplier document submission and compliance approval remain governed', async ({ request }) => {
+  const denied = await request.post('/api/documents', { data: { name: 'insurance.pdf' } })
+  expect(denied.status()).toBe(403)
+  const created = await request.post('/api/documents', { headers: { 'x-role': 'supplier-owner' }, data: { name: 'insurance.pdf' } })
+  expect(created.status()).toBe(201)
+  const document = await created.json()
+  const approved = await request.post(`/api/documents/${document.id}/approve`, { headers: { 'x-role': 'compliance-manager' } })
+  expect(approved.status()).toBe(200)
+  expect((await approved.json()).status).toBe('approved')
+})
+test('invalid documents and premature repeat approval return controlled failures', async ({ request }) => {
+  const invalid = await request.post('/api/documents', { headers: { 'x-role': 'supplier-owner' }, data: { name: 'x' } })
+  expect(invalid.status()).toBe(400)
+  const missing = await request.post('/api/documents/unknown/approve', { headers: { 'x-role': 'compliance-manager' } })
+  expect(missing.status()).toBe(404)
+})

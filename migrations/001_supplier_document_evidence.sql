@@ -1,0 +1,2 @@
+CREATE TABLE supplier_documents (id UUID PRIMARY KEY, name VARCHAR(255) NOT NULL, status VARCHAR(32) NOT NULL CHECK (status IN ('submitted','approved')), created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE document_regression_evidence (id UUID PRIMARY KEY, document_id UUID REFERENCES supplier_documents(id), scenario_name VARCHAR(160) NOT NULL, outcome VARCHAR(32) NOT NULL, captured_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP);
